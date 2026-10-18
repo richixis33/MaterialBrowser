@@ -1,10 +1,11 @@
-// Material Browser - Main Renderer Application Logic
+// Material Browser Expressive - Main Application Logic
 (() => {
   // DOM Elements
   const tabsList = document.getElementById('tabsList');
   const newTabBtn = document.getElementById('newTabBtn');
   const browserContent = document.getElementById('browserContent');
   const urlInput = document.getElementById('urlInput');
+  const engineIcon = document.getElementById('engineIcon');
   const securityIcon = document.getElementById('securityIcon');
   const starBtn = document.getElementById('starBtn');
   const backBtn = document.getElementById('backBtn');
@@ -20,6 +21,15 @@
   const winMaxBtn = document.getElementById('winMaxBtn');
   const winCloseBtn = document.getElementById('winCloseBtn');
 
+  // Wallpaper & Theme Studio
+  const wallpaperBtn = document.getElementById('wallpaperBtn');
+  const wallpaperModal = document.getElementById('wallpaperModal');
+  const closeWallpaperBtn = document.getElementById('closeWallpaperBtn');
+  const uploadZone = document.getElementById('uploadZone');
+  const wallpaperFileInput = document.getElementById('wallpaperFileInput');
+  const solidColorPicker = document.getElementById('solidColorPicker');
+  const wallpaperPresetsGrid = document.getElementById('wallpaperPresetsGrid');
+
   // Modals & Settings
   const settingsBtn = document.getElementById('settingsBtn');
   const settingsModal = document.getElementById('settingsModal');
@@ -28,7 +38,6 @@
   const closeHistoryBtn = document.getElementById('closeHistoryBtn');
   const historyList = document.getElementById('historyList');
   const themeSelect = document.getElementById('themeSelect');
-  const accentPicker = document.getElementById('accentPicker');
   const searchEngineSelect = document.getElementById('searchEngineSelect');
   const clearDataBtn = document.getElementById('clearDataBtn');
   const systemInfoText = document.getElementById('systemInfoText');
@@ -39,17 +48,36 @@
   let tabCounter = 0;
   let bookmarks = [];
   let history = [];
+
   let settings = {
     theme: 'dark',
-    accentColor: 'indigo',
-    searchEngine: 'google'
+    searchEngine: 'duckduckgo',
+    wallpaperType: 'preset', // 'preset', 'custom', or 'color'
+    wallpaperValue: 'cosmic-violet', // preset id or dataUrl or hex
+    accentColor: '#7F52FF'
   };
 
   const SEARCH_ENGINES = {
-    google: 'https://www.google.com/search?q=',
-    duckduckgo: 'https://duckduckgo.com/?q=',
-    bing: 'https://www.bing.com/search?q=',
-    yandex: 'https://yandex.com/search/?text='
+    duckduckgo: {
+      name: 'DuckDuckGo',
+      url: 'https://duckduckgo.com/?q=',
+      icon: Icons.duckduckgo
+    },
+    google: {
+      name: 'Google',
+      url: 'https://www.google.com/search?q=',
+      icon: Icons.search
+    },
+    bing: {
+      name: 'Bing',
+      url: 'https://www.bing.com/search?q=',
+      icon: Icons.search
+    },
+    yandex: {
+      name: 'Yandex',
+      url: 'https://yandex.com/search/?text=',
+      icon: Icons.search
+    }
   };
 
   // Initialize Icons
@@ -61,30 +89,39 @@
     homeBtn.innerHTML = Icons.home;
     securityIcon.innerHTML = Icons.lock;
     starBtn.innerHTML = Icons.star;
+    wallpaperBtn.innerHTML = Icons.palette;
     document.getElementById('downloadsBtn').innerHTML = Icons.download;
     settingsBtn.innerHTML = Icons.settings;
     menuBtn.innerHTML = Icons.moreVert;
     winMinBtn.innerHTML = Icons.minimize;
     winMaxBtn.innerHTML = Icons.maximize;
     winCloseBtn.innerHTML = Icons.close;
+    closeWallpaperBtn.innerHTML = Icons.close;
     closeSettingsBtn.innerHTML = Icons.close;
     closeHistoryBtn.innerHTML = Icons.close;
+    document.getElementById('uploadIcon').innerHTML = Icons.upload;
 
-    // Menu icons
+    // Dropdown menu icons
     document.querySelectorAll('.menu-icon').forEach(el => {
       const iconName = el.getAttribute('data-icon');
       if (Icons[iconName]) el.innerHTML = Icons[iconName];
     });
+
+    updateEngineIcon();
   }
 
-  // Load Settings and Storage from Electron main process
+  function updateEngineIcon() {
+    const curEngine = SEARCH_ENGINES[settings.searchEngine] || SEARCH_ENGINES.duckduckgo;
+    engineIcon.innerHTML = curEngine.icon;
+  }
+
+  // Load Settings and Initialize Dynamic Theme
   async function initStorage() {
     if (window.browserAPI) {
       try {
         const savedSettings = await window.browserAPI.getSettings();
         if (savedSettings) {
           settings = { ...settings, ...savedSettings };
-          applySettings();
         }
 
         bookmarks = await window.browserAPI.getBookmarks() || [];
@@ -100,23 +137,89 @@
         console.error('Failed to load storage:', err);
       }
     }
+
+    applyThemeSettings();
+    renderWallpaperPresets();
   }
 
-  // Apply Theme and Accent
-  function applySettings() {
+  // Apply Theme & Extract Dynamic Colors
+  async function applyThemeSettings() {
+    const isDark = settings.theme === 'dark';
     document.documentElement.setAttribute('data-theme', settings.theme);
-    document.documentElement.setAttribute('data-accent', settings.accentColor);
+
     if (themeSelect) themeSelect.value = settings.theme;
     if (searchEngineSelect) searchEngineSelect.value = settings.searchEngine;
+    updateEngineIcon();
 
-    // Highlight selected accent circle
-    document.querySelectorAll('.accent-circle').forEach(circle => {
-      if (circle.getAttribute('data-accent') === settings.accentColor) {
-        circle.classList.add('selected');
-      } else {
-        circle.classList.remove('selected');
-      }
+    if (settings.wallpaperType === 'color') {
+      // Solid Color -> Generate M3 Palette
+      const hsl = ThemeEngine.hexToHsl(settings.wallpaperValue);
+      const palette = ThemeEngine.generateM3Palette(hsl, isDark);
+      ThemeEngine.applyPalette(palette);
+      if (solidColorPicker) solidColorPicker.value = settings.wallpaperValue;
+    } else if (settings.wallpaperType === 'custom') {
+      // Custom Uploaded Image -> Extract Colors & Generate M3 Palette
+      const img = new Image();
+      img.onload = async () => {
+        const hsl = await ThemeEngine.extractDominantColor(img);
+        const palette = ThemeEngine.generateM3Palette(hsl, isDark);
+        ThemeEngine.applyPalette(palette);
+      };
+      img.src = settings.wallpaperValue;
+    } else {
+      // Preset Wallpaper
+      const preset = ThemeEngine.PRESET_WALLPAPERS.find(p => p.id === settings.wallpaperValue) || ThemeEngine.PRESET_WALLPAPERS[0];
+      const hsl = ThemeEngine.hexToHsl(preset.baseColor);
+      const palette = ThemeEngine.generateM3Palette(hsl, isDark);
+      ThemeEngine.applyPalette(palette);
+    }
+
+    // Refresh New Tab Pages currently open
+    document.querySelectorAll('.wallpaper-layer').forEach(layer => {
+      applyWallpaperToElement(layer);
     });
+  }
+
+  // Apply Wallpaper CSS to a specific background element
+  function applyWallpaperToElement(el) {
+    if (settings.wallpaperType === 'color') {
+      el.style.backgroundImage = 'none';
+      el.style.backgroundColor = settings.wallpaperValue;
+    } else if (settings.wallpaperType === 'custom') {
+      el.style.backgroundImage = `url("${settings.wallpaperValue}")`;
+      el.style.backgroundColor = 'transparent';
+    } else {
+      const preset = ThemeEngine.PRESET_WALLPAPERS.find(p => p.id === settings.wallpaperValue) || ThemeEngine.PRESET_WALLPAPERS[0];
+      el.style.backgroundImage = preset.gradient;
+      el.style.backgroundColor = 'transparent';
+    }
+  }
+
+  // Render Preset Wallpapers in Studio Grid
+  function renderWallpaperPresets() {
+    wallpaperPresetsGrid.innerHTML = '';
+    ThemeEngine.PRESET_WALLPAPERS.forEach(preset => {
+      const card = document.createElement('div');
+      card.className = `wallpaper-card ${settings.wallpaperType === 'preset' && settings.wallpaperValue === preset.id ? 'selected' : ''}`;
+      card.style.background = preset.gradient;
+      card.innerHTML = `<span class="wallpaper-card-title">${preset.name}</span>`;
+
+      card.addEventListener('click', () => {
+        settings.wallpaperType = 'preset';
+        settings.wallpaperValue = preset.id;
+        applyThemeSettings();
+        renderWallpaperPresets();
+        saveSettings();
+      });
+
+      wallpaperPresetsGrid.appendChild(card);
+    });
+  }
+
+  function saveSettings() {
+    if (window.browserAPI) {
+      window.browserAPI.saveSettings(settings);
+    }
   }
 
   // Create a New Tab
@@ -138,7 +241,7 @@
 
     tabs.push(tabData);
 
-    // Create Tab DOM item in Strip
+    // Create Tab DOM item
     const tabEl = document.createElement('div');
     tabEl.className = 'tab-item';
     tabEl.id = `tab_item_${tabId}`;
@@ -174,11 +277,10 @@
     }
 
     browserContent.appendChild(contentEl);
-
     switchTab(tabId);
   }
 
-  // Create Webview instance inside content wrapper
+  // Create Webview
   function createWebview(container, tabData) {
     container.innerHTML = '';
     const webview = document.createElement('webview');
@@ -212,7 +314,7 @@
       if (e.favicons && e.favicons.length > 0) {
         tabData.favicon = e.favicons[0];
         const tabEl = document.getElementById(`tab_item_${tabData.id}`);
-        if (tabEl) {
+        if (tabEl && !tabData.isLoading) {
           tabEl.querySelector('.tab-favicon').innerHTML = `<img src="${e.favicons[0]}" onerror="this.src=''; this.parentElement.innerHTML='${Icons.globe}';">`;
         }
       }
@@ -236,7 +338,6 @@
       }
     });
 
-    // Handle target="_blank" to open in new tab
     webview.addEventListener('new-window', (e) => {
       createTab(e.url);
     });
@@ -244,45 +345,74 @@
     container.appendChild(webview);
   }
 
-  // HTML template for Material 3 New Tab Page
+  // HTML template for Expressive New Tab Page
   function createNewTabHtml() {
     const hours = new Date().getHours();
     let greeting = 'Good morning';
     if (hours >= 12 && hours < 17) greeting = 'Good afternoon';
     else if (hours >= 17 || hours < 5) greeting = 'Good evening';
 
+    const searchEngine = SEARCH_ENGINES[settings.searchEngine] || SEARCH_ENGINES.duckduckgo;
+
     return `
       <div class="newtab-page">
-        <div class="newtab-clock" id="ntpClock">12:00</div>
-        <div class="newtab-greeting">${greeting}</div>
-        <div class="newtab-search-box">
-          ${Icons.search}
-          <input type="text" class="newtab-search-input" placeholder="Search Google or enter address" />
+        <div class="wallpaper-layer"></div>
+        <div class="wallpaper-overlay"></div>
+        <div class="newtab-content">
+          <div class="newtab-clock-card">
+            <div class="newtab-clock" id="ntpClock">12:00</div>
+            <div class="newtab-greeting-pill">
+              <span>${greeting}</span>
+            </div>
+          </div>
+
+          <!-- Expressive DuckDuckGo Search Capsule -->
+          <div class="newtab-search-box">
+            <div class="newtab-ddg-badge">
+              ${searchEngine.icon}
+            </div>
+            <input
+              type="text"
+              class="newtab-search-input"
+              placeholder="Search ${searchEngine.name} or type a URL"
+            />
+          </div>
+
+          <!-- Bento Grid Shortcuts -->
+          <div class="shortcuts-grid">
+            <div class="shortcut-card" data-url="https://duckduckgo.com">
+              <div class="shortcut-icon">${Icons.duckduckgo}</div>
+              <div class="shortcut-title">DuckDuckGo</div>
+            </div>
+            <div class="shortcut-card" data-url="https://github.com">
+              <div class="shortcut-icon">${Icons.globe}</div>
+              <div class="shortcut-title">GitHub</div>
+            </div>
+            <div class="shortcut-card" data-url="https://www.youtube.com">
+              <div class="shortcut-icon">${Icons.globe}</div>
+              <div class="shortcut-title">YouTube</div>
+            </div>
+            <div class="shortcut-card" data-url="https://en.wikipedia.org">
+              <div class="shortcut-icon">${Icons.globe}</div>
+              <div class="shortcut-title">Wikipedia</div>
+            </div>
+          </div>
         </div>
-        <div class="shortcuts-grid">
-          <div class="shortcut-card" data-url="https://www.google.com">
-            <div class="shortcut-icon">${Icons.globe}</div>
-            <div class="shortcut-title">Google</div>
-          </div>
-          <div class="shortcut-card" data-url="https://www.youtube.com">
-            <div class="shortcut-icon">${Icons.globe}</div>
-            <div class="shortcut-title">YouTube</div>
-          </div>
-          <div class="shortcut-card" data-url="https://github.com">
-            <div class="shortcut-icon">${Icons.globe}</div>
-            <div class="shortcut-title">GitHub</div>
-          </div>
-          <div class="shortcut-card" data-url="https://en.wikipedia.org">
-            <div class="shortcut-icon">${Icons.globe}</div>
-            <div class="shortcut-title">Wikipedia</div>
-          </div>
-        </div>
+
+        <!-- Customize Theme & Wallpaper FAB -->
+        <button class="fab-customize" id="ntpCustomizeFab" title="Customize Wallpaper & Colors">
+          ${Icons.palette}
+          <span>Customize</span>
+        </button>
       </div>
     `;
   }
 
-  // Setup Clock and Event handlers on New Tab Page
+  // Setup New Tab Page Events
   function setupNewTabPageEvents(container, tabId) {
+    const wallpaperLayer = container.querySelector('.wallpaper-layer');
+    if (wallpaperLayer) applyWallpaperToElement(wallpaperLayer);
+
     const clockEl = container.querySelector('#ntpClock');
     const updateClock = () => {
       const now = new Date();
@@ -308,6 +438,13 @@
         if (url) navigateTo(url);
       });
     });
+
+    const fab = container.querySelector('#ntpCustomizeFab');
+    if (fab) {
+      fab.addEventListener('click', () => {
+        wallpaperModal.classList.add('open');
+      });
+    }
   }
 
   // Switch Active Tab
@@ -316,20 +453,18 @@
     const tabData = tabs.find(t => t.id === tabId);
     if (!tabData) return;
 
-    // Update Tab strip classes
     document.querySelectorAll('.tab-item').forEach(el => {
       el.classList.toggle('active', el.id === `tab_item_${tabId}`);
     });
 
-    // Update Content wrapper visibility
     document.querySelectorAll('.webview-wrapper').forEach(el => {
       el.classList.toggle('active', el.id === `content_${tabId}`);
     });
 
-    // Update Omnibox URL
     if (tabData.isNewTab) {
+      const engineName = SEARCH_ENGINES[settings.searchEngine]?.name || 'DuckDuckGo';
       urlInput.value = '';
-      urlInput.placeholder = 'Search Google or enter address';
+      urlInput.placeholder = `Search ${engineName} or enter address`;
       document.title = 'New Tab - Material Browser';
       securityIcon.innerHTML = Icons.lock;
       securityIcon.classList.remove('secure');
@@ -342,10 +477,9 @@
       updateBookmarkStar(tabData.url);
     }
 
-    // Update Nav buttons
     backBtn.disabled = !tabData.canGoBack;
     forwardBtn.disabled = !tabData.canGoForward;
-    refreshBtn.innerHTML = tabData.isLoading ? Icons.close : Icons.refresh;
+    updateTabLoadingState(tabId, tabData.isLoading);
   }
 
   // Close Tab
@@ -353,7 +487,6 @@
     const index = tabs.findIndex(t => t.id === tabId);
     if (index === -1) return;
 
-    // Remove DOM elements
     const tabEl = document.getElementById(`tab_item_${tabId}`);
     if (tabEl) tabEl.remove();
 
@@ -370,7 +503,7 @@
     }
   }
 
-  // Navigate Active Tab to URL or Search
+  // Navigate Active Tab (Defaults to DuckDuckGo)
   function navigateTo(query) {
     if (!query) return;
     const tabData = tabs.find(t => t.id === activeTabId);
@@ -378,7 +511,6 @@
 
     let targetUrl = query.trim();
 
-    // Check if it's a URL or search query
     const isUrl = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/.test(targetUrl) ||
                   /^localhost(:\d+)?(\/.*)?$/.test(targetUrl);
 
@@ -387,8 +519,8 @@
         targetUrl = 'https://' + targetUrl;
       }
     } else {
-      const enginePrefix = SEARCH_ENGINES[settings.searchEngine] || SEARCH_ENGINES.google;
-      targetUrl = enginePrefix + encodeURIComponent(targetUrl);
+      const curEngine = SEARCH_ENGINES[settings.searchEngine] || SEARCH_ENGINES.duckduckgo;
+      targetUrl = curEngine.url + encodeURIComponent(targetUrl);
     }
 
     tabData.url = targetUrl;
@@ -408,9 +540,9 @@
     updateSecurityIcon(targetUrl);
   }
 
-  // Update Security Icon (Lock / Open lock)
+  // Update Security Icon
   function updateSecurityIcon(url) {
-    if (url.startsWith('https://')) {
+    if (url && url.startsWith('https://')) {
       securityIcon.innerHTML = Icons.lock;
       securityIcon.classList.add('secure');
     } else {
@@ -419,14 +551,31 @@
     }
   }
 
-  // Update Tab Loading State
+  // Update Loading State (Expressive Shape-Morphing Loader)
   function updateTabLoadingState(tabId, isLoading) {
+    const tabEl = document.getElementById(`tab_item_${tabId}`);
+    const tabData = tabs.find(t => t.id === tabId);
+
+    if (tabEl && tabData) {
+      const favEl = tabEl.querySelector('.tab-favicon');
+      if (isLoading) {
+        // Render dynamic shape-morphing loader in tab
+        favEl.innerHTML = Icons.shapeMorphSpinner(16);
+      } else {
+        if (tabData.favicon) {
+          favEl.innerHTML = `<img src="${tabData.favicon}" onerror="this.src=''; this.parentElement.innerHTML='${Icons.globe}';">`;
+        } else {
+          favEl.innerHTML = Icons.globe;
+        }
+      }
+    }
+
     if (activeTabId === tabId) {
       refreshBtn.innerHTML = isLoading ? Icons.close : Icons.refresh;
     }
   }
 
-  // Update Navigation State (canGoBack / canGoForward)
+  // Navigation state
   function updateTabNavigationState(tabId, webview) {
     const tabData = tabs.find(t => t.id === tabId);
     if (tabData && webview) {
@@ -454,7 +603,7 @@
     }
   }
 
-  // Bookmarks Bar Rendering
+  // Bookmarks
   function renderBookmarksBar() {
     bookmarksBar.innerHTML = '';
     bookmarks.forEach(bm => {
@@ -466,7 +615,6 @@
     });
   }
 
-  // Toggle Bookmark for current page
   function toggleBookmark() {
     const tabData = tabs.find(t => t.id === activeTabId);
     if (!tabData || tabData.isNewTab) return;
@@ -498,7 +646,7 @@
     starBtn.innerHTML = isBookmarked ? Icons.starFilled : Icons.star;
   }
 
-  // Render History in Modal
+  // History Modal
   function renderHistoryModal() {
     historyList.innerHTML = '';
     if (history.length === 0) {
@@ -525,6 +673,21 @@
     });
   }
 
+  // Wallpaper Upload Handling (Drag & Drop or File Dialog)
+  function handleWallpaperFile(file) {
+    if (!file || !file.type.startsWith('image/')) return;
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      settings.wallpaperType = 'custom';
+      settings.wallpaperValue = dataUrl;
+      applyThemeSettings();
+      renderWallpaperPresets();
+      saveSettings();
+    };
+    reader.readAsDataURL(file);
+  }
+
   // Event Listeners
   newTabBtn.addEventListener('click', () => createTab('newtab'));
 
@@ -536,7 +699,6 @@
   });
 
   urlInput.addEventListener('focus', () => urlInput.select());
-
   starBtn.addEventListener('click', toggleBookmark);
 
   backBtn.addEventListener('click', () => {
@@ -597,14 +759,16 @@
     dropdownMenu.classList.toggle('open');
   });
 
-  document.addEventListener('click', () => {
-    dropdownMenu.classList.remove('open');
-  });
+  document.addEventListener('click', () => dropdownMenu.classList.remove('open'));
+
+  wallpaperBtn.addEventListener('click', () => wallpaperModal.classList.add('open'));
+  closeWallpaperBtn.addEventListener('click', () => wallpaperModal.classList.remove('open'));
 
   settingsBtn.addEventListener('click', () => settingsModal.classList.add('open'));
   closeSettingsBtn.addEventListener('click', () => settingsModal.classList.remove('open'));
 
   document.getElementById('menuNewTab').addEventListener('click', () => createTab('newtab'));
+  document.getElementById('menuWallpaper').addEventListener('click', () => wallpaperModal.classList.add('open'));
   document.getElementById('menuSettings').addEventListener('click', () => settingsModal.classList.add('open'));
   document.getElementById('menuHistory').addEventListener('click', () => {
     renderHistoryModal();
@@ -618,25 +782,51 @@
     if (webview) webview.openDevTools();
   });
 
-  // Theme & Accent Switcher
-  themeSelect.addEventListener('change', (e) => {
-    settings.theme = e.target.value;
-    applySettings();
-    if (window.browserAPI) window.browserAPI.saveSettings(settings);
+  // Wallpaper Upload Zone & File Picker
+  uploadZone.addEventListener('click', () => wallpaperFileInput.click());
+  wallpaperFileInput.addEventListener('change', (e) => {
+    if (e.target.files && e.target.files[0]) {
+      handleWallpaperFile(e.target.files[0]);
+    }
   });
 
-  accentPicker.addEventListener('click', (e) => {
-    const circle = e.target.closest('.accent-circle');
-    if (circle) {
-      settings.accentColor = circle.getAttribute('data-accent');
-      applySettings();
-      if (window.browserAPI) window.browserAPI.saveSettings(settings);
+  uploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadZone.style.borderColor = 'var(--md-primary)';
+  });
+
+  uploadZone.addEventListener('dragleave', () => {
+    uploadZone.style.borderColor = 'var(--md-outline)';
+  });
+
+  uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.style.borderColor = 'var(--md-outline)';
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleWallpaperFile(e.dataTransfer.files[0]);
     }
+  });
+
+  // Solid Color Picker
+  solidColorPicker.addEventListener('input', (e) => {
+    settings.wallpaperType = 'color';
+    settings.wallpaperValue = e.target.value;
+    applyThemeSettings();
+    renderWallpaperPresets();
+    saveSettings();
+  });
+
+  // Settings
+  themeSelect.addEventListener('change', (e) => {
+    settings.theme = e.target.value;
+    applyThemeSettings();
+    saveSettings();
   });
 
   searchEngineSelect.addEventListener('change', (e) => {
     settings.searchEngine = e.target.value;
-    if (window.browserAPI) window.browserAPI.saveSettings(settings);
+    updateEngineIcon();
+    saveSettings();
   });
 
   clearDataBtn.addEventListener('click', async () => {
@@ -649,7 +839,7 @@
     }
   });
 
-  // Global Keyboard Shortcuts
+  // Keyboard Shortcuts
   window.addEventListener('keydown', (e) => {
     if (e.ctrlKey && e.key.toLowerCase() === 't') {
       e.preventDefault();
@@ -667,6 +857,7 @@
       historyModal.classList.add('open');
     } else if (e.key === 'Escape') {
       settingsModal.classList.remove('open');
+      wallpaperModal.classList.remove('open');
       historyModal.classList.remove('open');
       dropdownMenu.classList.remove('open');
     }

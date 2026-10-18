@@ -37,19 +37,18 @@ function createWindow() {
     height: 820,
     minWidth: 800,
     minHeight: 600,
-    frame: false, // Frameless for custom Material Design titlebar
-    backgroundColor: '#1E1E2E',
+    frame: false, // Frameless for custom Material 3 titlebar
+    backgroundColor: '#141218',
     show: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      webviewTag: true, // Enables <webview> for multi-tab rendering
+      webviewTag: true,
       spellcheck: true
     }
   });
 
-  // Remove default menu bar
   Menu.setApplicationMenu(null);
 
   mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'));
@@ -58,7 +57,6 @@ function createWindow() {
     mainWindow.show();
   });
 
-  // Handle window maximize/unmaximize state for renderer titlebar buttons
   mainWindow.on('maximize', () => {
     if (mainWindow && !mainWindow.isDestroyed()) {
       mainWindow.webContents.send('window:state-changed', { isMaximized: true });
@@ -71,15 +69,12 @@ function createWindow() {
     }
   });
 
-  // Setup download tracking
-  session.defaultSession.on('will-download', (event, item, webContents) => {
+  // Track downloads
+  session.defaultSession.on('will-download', (event, item) => {
     const filename = item.getFilename();
     const totalBytes = item.getTotalBytes();
 
-    mainWindow.webContents.send('download:started', {
-      filename,
-      totalBytes
-    });
+    mainWindow.webContents.send('download:started', { filename, totalBytes });
 
     item.on('updated', (evt, state) => {
       if (state === 'interrupted') {
@@ -103,7 +98,6 @@ function createWindow() {
   });
 }
 
-// App lifecycle
 app.whenReady().then(() => {
   createWindow();
 
@@ -120,7 +114,7 @@ app.on('window-all-closed', () => {
   }
 });
 
-// IPC Window Controls
+// Window Controls
 ipcMain.handle('window:minimize', () => {
   if (mainWindow) mainWindow.minimize();
 });
@@ -145,10 +139,10 @@ ipcMain.handle('window:isMaximized', () => {
   return mainWindow ? mainWindow.isMaximized() : false;
 });
 
-// IPC Bookmarks
+// Storage Bookmarks
 ipcMain.handle('storage:get-bookmarks', () => {
   return readJSON(bookmarksFile, [
-    { title: 'Google', url: 'https://www.google.com', id: 'bm_1' },
+    { title: 'DuckDuckGo', url: 'https://duckduckgo.com', id: 'bm_1' },
     { title: 'GitHub', url: 'https://github.com', id: 'bm_2' },
     { title: 'YouTube', url: 'https://www.youtube.com', id: 'bm_3' },
     { title: 'Wikipedia', url: 'https://en.wikipedia.org', id: 'bm_4' }
@@ -160,7 +154,7 @@ ipcMain.handle('storage:save-bookmarks', (event, bookmarks) => {
   return true;
 });
 
-// IPC History
+// Storage History
 ipcMain.handle('storage:get-history', () => {
   return readJSON(historyFile, []);
 });
@@ -170,13 +164,14 @@ ipcMain.handle('storage:save-history', (event, history) => {
   return true;
 });
 
-// IPC Settings
+// Storage Settings (Default to DuckDuckGo and Cosmic Violet wallpaper)
 ipcMain.handle('storage:get-settings', () => {
   return readJSON(settingsFile, {
-    theme: 'system',
-    accentColor: 'indigo',
-    searchEngine: 'google',
-    homePage: 'newtab',
+    theme: 'dark',
+    searchEngine: 'duckduckgo',
+    wallpaperType: 'preset',
+    wallpaperValue: 'cosmic-violet',
+    accentColor: '#7F52FF',
     showBookmarksBar: true
   });
 });
@@ -186,7 +181,7 @@ ipcMain.handle('storage:save-settings', (event, settings) => {
   return true;
 });
 
-// IPC System / Chromium Info
+// App & Chromium Info
 ipcMain.handle('app:get-info', () => {
   return {
     version: app.getVersion(),
@@ -198,7 +193,7 @@ ipcMain.handle('app:get-info', () => {
   };
 });
 
-// IPC Clear Browsing Data
+// Clear Data
 ipcMain.handle('app:clear-data', async () => {
   try {
     await session.defaultSession.clearCache();
@@ -210,7 +205,7 @@ ipcMain.handle('app:clear-data', async () => {
   }
 });
 
-// Open external link in default browser if needed
+// Shell External
 ipcMain.handle('shell:open-external', async (event, url) => {
   return shell.openExternal(url);
 });

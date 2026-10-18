@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark" data-accent="indigo">
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,16 +8,14 @@
 </head>
 <body>
 
-  <!-- Top Header: Titlebar & Tab Strip -->
+  <!-- Top Header: Glassmorphic Titlebar & Floating Tabs -->
   <header class="header-container">
     <div class="titlebar">
       <div class="tabs-strip-container">
         <div class="tabs-scroll" id="tabsList">
-          <!-- Dynamic Material Tabs will be inserted here -->
+          <!-- Dynamic Material 3 Expressive Tabs -->
         </div>
-        <button class="tab-add-btn" id="newTabBtn" title="New Tab (Ctrl+T)">
-          <!-- Add Icon -->
-        </button>
+        <button class="tab-add-btn" id="newTabBtn" title="New Tab (Ctrl+T)"></button>
       </div>
 
       <!-- Window Control Buttons (Min, Max, Close) -->
@@ -28,7 +26,7 @@
       </div>
     </div>
 
-    <!-- Navigation & Omnibox Toolbar -->
+    <!-- Navigation & Floating Omnibox Toolbar -->
     <div class="toolbar">
       <div class="nav-actions">
         <button class="icon-btn" id="backBtn" title="Back (Alt+Left)" disabled></button>
@@ -37,31 +35,33 @@
         <button class="icon-btn" id="homeBtn" title="Home"></button>
       </div>
 
-      <!-- Material 3 Omnibox / Address Bar -->
+      <!-- Material 3 Floating Omnibox -->
       <div class="omnibox-container">
         <div class="omnibox">
-          <div class="omnibox-security-icon" id="securityIcon" title="Connection Security">
-            <!-- Security Lock Icon -->
+          <div class="omnibox-chip" id="searchChip" title="Search Engine & Security">
+            <span id="engineIcon"></span>
+            <span id="securityIcon"></span>
           </div>
           <input
             type="text"
             class="omnibox-input"
             id="urlInput"
-            placeholder="Search Google or enter address"
+            placeholder="Search DuckDuckGo or enter address"
             spellcheck="false"
             autocomplete="off"
           />
           <div class="omnibox-actions">
-            <button class="icon-btn omnibox-star-btn" id="starBtn" title="Bookmark this tab"></button>
+            <button class="icon-btn omnibox-star-btn" id="starBtn" title="Bookmark page"></button>
           </div>
         </div>
       </div>
 
-      <!-- Right Action Buttons -->
+      <!-- Right Action Toolbar -->
       <div class="nav-actions">
+        <button class="icon-btn" id="wallpaperBtn" title="Wallpaper & Dynamic Colors"></button>
         <button class="icon-btn" id="downloadsBtn" title="Downloads"></button>
         <button class="icon-btn" id="settingsBtn" title="Settings"></button>
-        <button class="icon-btn" id="menuBtn" title="Customize and control Material Browser"></button>
+        <button class="icon-btn" id="menuBtn" title="Menu"></button>
       </div>
     </div>
 
@@ -76,6 +76,10 @@
     <div class="menu-item" id="menuNewTab">
       <span class="menu-icon" data-icon="add"></span>
       <span>New Tab</span>
+    </div>
+    <div class="menu-item" id="menuWallpaper">
+      <span class="menu-icon" data-icon="wallpaper"></span>
+      <span>Wallpaper & Theme</span>
     </div>
     <div class="menu-item" id="menuBookmarks">
       <span class="menu-icon" data-icon="bookmarks"></span>
@@ -102,10 +106,69 @@
 
   <!-- Browser Content Area (Webviews & NTP) -->
   <main class="browser-content" id="browserContent">
-    <!-- Active tab content goes here -->
+    <!-- Active tab content or New Tab Page rendered here -->
   </main>
 
-  <!-- Material 3 Settings Dialog -->
+  <!-- Material 3 Wallpaper & Theme Studio Modal -->
+  <div class="modal-overlay" id="wallpaperModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 class="modal-title">Wallpaper & Dynamic Colors</h2>
+        <button class="icon-btn modal-close-btn" id="closeWallpaperBtn"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Live Palette Preview -->
+        <div class="setting-item" style="flex-direction: column; align-items: stretch; gap: 8px;">
+          <div class="setting-label">
+            <span class="setting-title">Material You Dynamic Palette</span>
+            <span class="setting-subtitle">Automatically generated from your wallpaper or solid color</span>
+          </div>
+          <div class="palette-preview">
+            <div class="palette-chip" id="swatchPrimary" style="background: var(--md-primary); color: var(--md-on-primary);">Primary</div>
+            <div class="palette-chip" id="swatchContainer" style="background: var(--md-primary-container); color: var(--md-on-primary-container);">Container</div>
+            <div class="palette-chip" id="swatchSurface" style="background: var(--md-surface-container-high); color: var(--md-on-surface);">Surface</div>
+          </div>
+        </div>
+
+        <!-- Custom Upload Zone -->
+        <div class="setting-item" style="flex-direction: column; align-items: stretch; gap: 8px;">
+          <div class="setting-label">
+            <span class="setting-title">Custom Wallpaper Image</span>
+            <span class="setting-subtitle">Upload any image — the browser will adapt its dynamic colors to it</span>
+          </div>
+          <div class="upload-zone" id="uploadZone">
+            <span id="uploadIcon"></span>
+            <span style="font-size: 13px; font-weight: 500;">Click or drag & drop an image here</span>
+            <input type="file" id="wallpaperFileInput" accept="image/*" style="display: none;" />
+          </div>
+        </div>
+
+        <!-- Solid Color Picker -->
+        <div class="setting-item">
+          <div class="setting-label">
+            <span class="setting-title">Solid Accent Color</span>
+            <span class="setting-subtitle">Or pick a base color to generate the entire theme</span>
+          </div>
+          <div class="setting-control">
+            <input type="color" id="solidColorPicker" value="#7F52FF" />
+          </div>
+        </div>
+
+        <!-- Preset Wallpapers Grid -->
+        <div class="setting-item" style="flex-direction: column; align-items: stretch; gap: 8px; border-bottom: none;">
+          <div class="setting-label">
+            <span class="setting-title">Preset Wallpapers</span>
+            <span class="setting-subtitle">Curated Material You themes</span>
+          </div>
+          <div class="wallpaper-grid" id="wallpaperPresetsGrid">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Material 3 Settings Modal -->
   <div class="modal-overlay" id="settingsModal">
     <div class="modal-dialog">
       <div class="modal-header">
@@ -116,29 +179,14 @@
         <!-- Appearance Theme -->
         <div class="setting-item">
           <div class="setting-label">
-            <span class="setting-title">Theme</span>
-            <span class="setting-subtitle">Choose between Light or Dark theme</span>
+            <span class="setting-title">Color Mode</span>
+            <span class="setting-subtitle">Switch between Dark and Light Material theme</span>
           </div>
           <div class="setting-control">
             <select id="themeSelect">
-              <option value="dark">Dark Theme</option>
-              <option value="light">Light Theme</option>
+              <option value="dark">Dark Mode</option>
+              <option value="light">Light Mode</option>
             </select>
-          </div>
-        </div>
-
-        <!-- Material Accent Colors -->
-        <div class="setting-item">
-          <div class="setting-label">
-            <span class="setting-title">Material Accent Color</span>
-            <span class="setting-subtitle">Dynamic Material You color accents</span>
-          </div>
-          <div class="accent-picker" id="accentPicker">
-            <div class="accent-circle selected" data-accent="indigo" style="background: #A8C7FA;" title="Indigo"></div>
-            <div class="accent-circle" data-accent="purple" style="background: #D0BCFF;" title="Purple"></div>
-            <div class="accent-circle" data-accent="emerald" style="background: #6CDDB2;" title="Emerald"></div>
-            <div class="accent-circle" data-accent="amber" style="background: #FFB786;" title="Amber"></div>
-            <div class="accent-circle" data-accent="rose" style="background: #FFB1C8;" title="Rose"></div>
           </div>
         </div>
 
@@ -146,12 +194,12 @@
         <div class="setting-item">
           <div class="setting-label">
             <span class="setting-title">Default Search Engine</span>
-            <span class="setting-subtitle">Engine used when typing in omnibox</span>
+            <span class="setting-subtitle">Engine used when typing in omnibox or new tab</span>
           </div>
           <div class="setting-control">
             <select id="searchEngineSelect">
+              <option value="duckduckgo" selected>DuckDuckGo (Default)</option>
               <option value="google">Google</option>
-              <option value="duckduckgo">DuckDuckGo</option>
               <option value="bing">Bing</option>
               <option value="yandex">Yandex</option>
             </select>
@@ -170,8 +218,8 @@
         <!-- About Material Browser -->
         <div class="setting-item" style="border-bottom: none;">
           <div class="setting-label">
-            <span class="setting-title">About Material Browser</span>
-            <span class="setting-subtitle" id="systemInfoText">Chromium based | Material Design 3</span>
+            <span class="setting-title">About Material Browser Expressive</span>
+            <span class="setting-subtitle" id="systemInfoText">Chromium based | Material You M3</span>
           </div>
         </div>
       </div>
@@ -193,6 +241,7 @@
 
   <!-- Scripts -->
   <script src="icons.js"></script>
+  <script src="themeEngine.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

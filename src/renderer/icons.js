@@ -1,4 +1,4 @@
-// Material Design 3 SVG Icons (Material Symbols)
+// Material Design 3 Expressive SVG Icons
 const Icons = {
   arrowBack: `<svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>`,
   arrowForward: `<svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>`,
@@ -21,5 +21,15 @@ const Icons = {
   restore: `<svg viewBox="0 0 24 24"><path d="M4 8H2V4c0-1.1.9-2 2-2h4v2H4v4zm16-4h-4V2h4c1.1 0 2 .9 2 2v4h-2V4zm-2 16H8v-8h10v8zm2-10h-2V8h2c1.1 0 2 .9 2 2v2zm-2 12v-2h2v2c0 1.1-.9 2-2 2zm-14 0H4c-1.1 0-2-.9-2-2v-4h2v4h4v2z"/></svg>`,
   globe: `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>`,
   palette: `<svg viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.22 19.46 10.57 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/></svg>`,
-  trash: `<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`
+  trash: `<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>`,
+  wallpaper: `<svg viewBox="0 0 24 24"><path d="M4 4h7V2H4c-1.1 0-2 .9-2 2v7h2V4zm6 9l-4 5h12l-3-4-2.03 2.71L10 13zm10-9h-7v2h7v7h2V4c0-1.1-.9-2-2-2zm0 16h-7v2h7c1.1 0 2-.9 2-2v-7h-2v7zM4 13H2v7c0 1.1.9 2 2 2h7v-2H4v-7z"/></svg>`,
+  upload: `<svg viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></svg>`,
+  duckduckgo: `<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.61 14.88c-1.39.32-3.13.08-4.33-.74-.83-.56-1.32-1.44-1.38-2.42-.08-1.28.62-2.47 1.74-3.08.97-.53 2.16-.62 3.25-.49 1.15.14 2.19.7 2.89 1.62.77 1.01.95 2.37.49 3.55-.38.98-1.39 1.34-2.66 1.56zm1.99-6.43c-.47-.11-.96-.13-1.42-.05-.33.06-.65.17-.92.35-.38.25-.56.68-.48 1.11.08.43.43.74.87.77.53.04 1.05-.18 1.47-.5.36-.27.57-.69.48-1.13-.04-.22-.19-.44-.42-.55z"/></svg>`,
+  // Material 3 Expressive Shape-Morphing Spinner HTML/SVG generator
+  shapeMorphSpinner: (size = 20) => `
+    <div class="m3-morph-loader" style="width: ${size}px; height: ${size}px;">
+      <div class="m3-morph-shape"></div>
+      <div class="m3-morph-core"></div>
+    </div>
+  `
 };
