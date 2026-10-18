@@ -1,5 +1,10 @@
 # Material Browser Expressive 🌐🎨✨
 
+[![Build Status](https://github.com/richixis33/MaterialBrowser/actions/workflows/build.yml/badge.svg)](https://github.com/richixis33/MaterialBrowser/actions)
+![Release](https://img.shields.io/badge/version-1.0.0-purple)
+![Chromium](https://img.shields.io/badge/engine-Chromium-blue)
+![Design](https://img.shields.io/badge/UI-Material_You_M3_Expressive-6750A4)
+
 Современный веб-браузер на базе **Chromium** (Blink + V8) с инновационным интерфейсом **Google Material Design 3 Expressive (Material You)**, динамической генерацией темы по обоям и анимациями смены формы.
 
 ---

@@ -1,11 +1,11 @@
 /* ==========================================================================
-   Material Design 3 (Material You) Expressive Theme & Dynamic Styling
+   Material Design 3 Expressive & Simple Mode Theme System
    ========================================================================== */
 
 :root {
   --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Google Sans', Helvetica, Arial, sans-serif;
 
-  /* Baseline Fallback Tokens (Overridden dynamically by ThemeEngine) */
+  /* Dynamic Baseline Tokens (Overridden by ThemeEngine) */
   --md-primary: #D0BCFF;
   --md-on-primary: #381E72;
   --md-primary-container: #4F378B;
@@ -31,7 +31,7 @@
   --md-elevation-3: 0 6px 16px 4px rgba(0, 0, 0, 0.35), 0 3px 6px 0 rgba(0, 0, 0, 0.45);
   --md-elevation-glow: 0 0 24px 2px var(--md-glow);
 
-  /* Expressive Shapes */
+  /* Shapes */
   --shape-corner-full: 9999px;
   --shape-corner-extra-large: 28px;
   --shape-corner-large: 18px;
@@ -40,7 +40,7 @@
 
   /* Transitions */
   --transition-fast: 0.15s cubic-bezier(0.2, 0, 0, 1);
-  --transition-normal: 0.3s cubic-bezier(0.2, 0, 0, 1);
+  --transition-normal: 0.28s cubic-bezier(0.2, 0, 0, 1);
   --transition-bounce: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
@@ -75,7 +75,7 @@ body {
   flex-direction: column;
   border-bottom: 1px solid var(--md-outline-variant);
   z-index: 100;
-  transition: background var(--transition-normal), border-color var(--transition-normal);
+  transition: all var(--transition-normal);
 }
 
 .titlebar {
@@ -110,12 +110,12 @@ body {
   display: none;
 }
 
-/* Material 3 Expressive Floating Tab */
+/* Floating Tab */
 .tab-item {
   display: flex;
   align-items: center;
   height: 36px;
-  min-width: 140px;
+  min-width: 135px;
   max-width: 230px;
   flex: 1;
   background-color: transparent;
@@ -198,7 +198,7 @@ body {
   fill: currentColor;
 }
 
-/* Tab Add Button (Expressive Pill) */
+/* Tab Add Button */
 .tab-add-btn {
   width: 34px;
   height: 34px;
@@ -276,6 +276,7 @@ body {
   padding: 0 14px;
   gap: 10px;
   background-color: var(--md-surface-container-low);
+  transition: all var(--transition-normal);
 }
 
 .nav-actions {
@@ -349,7 +350,6 @@ body {
   transform: scale(1.008);
 }
 
-/* Engine / Security Chip */
 .omnibox-chip {
   display: flex;
   align-items: center;
@@ -410,6 +410,7 @@ body {
   border-bottom: 1px solid var(--md-outline-variant);
   overflow-x: auto;
   scrollbar-width: none;
+  transition: all var(--transition-normal);
 }
 
 .bookmarks-bar::-webkit-scrollbar {
@@ -447,7 +448,7 @@ body {
 }
 
 /* ==========================================================================
-   Material 3 Expressive Shape-Morphing Loading Spinner
+   Material 3 Expressive Shape-Morphing Spinner
    ========================================================================== */
 .m3-morph-loader {
   display: inline-flex;
@@ -476,29 +477,24 @@ body {
   animation: md3CoreCounterRotate 2.6s linear infinite;
 }
 
-/* Keyframes for Shape-Morphing */
 @keyframes md3ShapeMorph {
   0% {
     border-radius: 50%;
     transform: rotate(0deg) scale(0.92);
   }
   20% {
-    /* 4-point rounded star / clover */
     border-radius: 28% 72% 35% 65% / 65% 38% 62% 35%;
     transform: rotate(90deg) scale(1.06);
   }
   40% {
-    /* Rounded 8-point wavy polygon */
     border-radius: 40% 60% 40% 60% / 60% 40% 60% 40%;
     transform: rotate(180deg) scale(0.94);
   }
   60% {
-    /* Fluid asymmetric petal */
     border-radius: 65% 35% 70% 30% / 30% 60% 40% 70%;
     transform: rotate(270deg) scale(1.08);
   }
   80% {
-    /* Rounded squircle */
     border-radius: 35% 65% 30% 70% / 55% 35% 65% 45%;
     transform: rotate(330deg) scale(0.96);
   }
@@ -509,12 +505,8 @@ body {
 }
 
 @keyframes md3ColorPulse {
-  0%, 100% {
-    filter: brightness(1) saturate(1.1);
-  }
-  50% {
-    filter: brightness(1.25) saturate(1.35);
-  }
+  0%, 100% { filter: brightness(1) saturate(1.1); }
+  50% { filter: brightness(1.25) saturate(1.35); }
 }
 
 @keyframes md3CoreCounterRotate {
@@ -524,7 +516,7 @@ body {
 }
 
 /* ==========================================================================
-   New Tab Page (NTP): Wallpaper, Clock & Expressive Bento
+   New Tab Page (NTP): Hero Branding with App Icon & Title
    ========================================================================== */
 .browser-content {
   flex: 1;
@@ -553,7 +545,6 @@ body {
   border: none;
 }
 
-/* Dynamic Wallpaper Container */
 .newtab-page {
   width: 100%;
   height: 100%;
@@ -600,39 +591,58 @@ body {
   max-width: 720px;
 }
 
-/* Material You Dynamic Clock */
-.newtab-clock-card {
+/* Hero Branding Card (Replaces the clock & greeting) */
+.newtab-hero-card {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 30px;
-  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  margin-bottom: 34px;
+  text-align: center;
 }
 
-.newtab-clock {
-  font-size: 78px;
-  font-weight: 300;
-  color: #FFFFFF;
-  letter-spacing: -2px;
-  line-height: 1;
-  margin-bottom: 8px;
-}
-
-.newtab-greeting-pill {
+.hero-logo-wrapper {
+  width: 84px;
+  height: 84px;
+  border-radius: var(--shape-corner-full);
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 18px;
-  border-radius: var(--shape-corner-full);
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(12px);
-  color: #FFFFFF;
-  font-size: 15px;
-  font-weight: 500;
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3), var(--md-elevation-glow);
+  margin-bottom: 16px;
+  transition: all var(--transition-bounce);
 }
 
-/* DuckDuckGo Expressive Search Box */
+.hero-logo-wrapper:hover {
+  transform: scale(1.08) rotate(5deg);
+  box-shadow: 0 12px 36px var(--md-glow);
+}
+
+.hero-logo {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+
+.newtab-hero-title {
+  font-size: 34px;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: -0.6px;
+  margin-bottom: 4px;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+}
+
+.newtab-hero-subtitle {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--md-on-surface-variant);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.6);
+}
+
+/* DuckDuckGo Search Box */
 .newtab-search-box {
   width: 100%;
   height: 56px;
@@ -686,7 +696,7 @@ body {
   color: var(--md-on-surface-variant);
 }
 
-/* Expressive Shortcuts Bento Grid */
+/* Bento Shortcuts Grid */
 .shortcuts-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -750,7 +760,6 @@ body {
   max-width: 100px;
 }
 
-/* Floating Customize FAB (Bottom Right) */
 .fab-customize {
   position: absolute;
   bottom: 24px;
@@ -783,7 +792,58 @@ body {
 }
 
 /* ==========================================================================
-   Material 3 Modals & Wallpaper Studio
+   Simple Mode Overrides ([data-mode="simple"])
+   ========================================================================== */
+[data-mode="simple"] {
+  --shape-corner-full: 12px;
+  --shape-corner-extra-large: 16px;
+  --shape-corner-large: 12px;
+  --shape-corner-medium: 8px;
+}
+
+[data-mode="simple"] .tab-item {
+  border-radius: 8px;
+  height: 32px;
+}
+
+[data-mode="simple"] .tab-item.active {
+  box-shadow: none;
+  border-color: var(--md-primary);
+}
+
+[data-mode="simple"] .omnibox {
+  border-radius: 10px;
+  height: 38px;
+  box-shadow: none;
+}
+
+[data-mode="simple"] .omnibox:focus-within {
+  box-shadow: 0 0 0 2px var(--md-primary);
+  transform: none;
+}
+
+[data-mode="simple"] .header-container {
+  backdrop-filter: none;
+}
+
+[data-mode="simple"] .newtab-search-box {
+  border-radius: 12px;
+  height: 48px;
+  box-shadow: var(--md-elevation-1);
+}
+
+[data-mode="simple"] .shortcut-card {
+  border-radius: 10px;
+  padding: 12px 8px;
+}
+
+[data-mode="simple"] .hero-logo-wrapper {
+  border-radius: 16px;
+  box-shadow: none;
+}
+
+/* ==========================================================================
+   Animated Settings Modal with Segmented Tabs
    ========================================================================== */
 .modal-overlay {
   position: fixed;
@@ -812,7 +872,7 @@ body {
   box-shadow: var(--md-elevation-3);
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
   border: 1px solid var(--md-outline-variant);
   animation: modalFadeIn 0.25s cubic-bezier(0.2, 0, 0, 1);
 }
@@ -840,13 +900,124 @@ body {
   color: var(--md-on-surface);
 }
 
-.modal-body {
+/* Animated Segmented Tabs */
+.settings-segmented-bar {
   display: flex;
+  align-items: center;
+  background-color: var(--md-surface-container);
+  border-radius: var(--shape-corner-full);
+  padding: 4px;
+  position: relative;
+  gap: 4px;
+}
+
+.settings-tab-btn {
+  flex: 1;
+  height: 34px;
+  background: transparent;
+  border: none;
+  border-radius: var(--shape-corner-full);
+  color: var(--md-on-surface-variant);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color var(--transition-fast), background var(--transition-fast);
+  z-index: 2;
+}
+
+.settings-tab-btn.active {
+  color: var(--md-on-primary-container);
+  background-color: var(--md-primary-container);
+  font-weight: 600;
+  box-shadow: var(--md-elevation-1);
+}
+
+/* Settings Panels Animated Switching */
+.settings-panel-container {
+  position: relative;
+  min-height: 260px;
+}
+
+.settings-panel {
+  display: none;
   flex-direction: column;
+  gap: 14px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.2s cubic-bezier(0.2, 0, 0, 1), transform 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.settings-panel.active {
+  display: flex;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Material 3 Switch */
+.m3-switch {
+  position: relative;
+  display: inline-block;
+  width: 52px;
+  height: 32px;
+}
+
+.m3-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.m3-switch-slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: var(--md-surface-container-highest);
+  border: 2px solid var(--md-outline);
+  border-radius: var(--shape-corner-full);
+  transition: all var(--transition-fast);
+}
+
+.m3-switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 5px;
+  bottom: 5px;
+  background-color: var(--md-outline);
+  border-radius: 50%;
+  transition: all var(--transition-bounce);
+}
+
+.m3-switch input:checked + .m3-switch-slider {
+  background-color: var(--md-primary);
+  border-color: var(--md-primary);
+}
+
+.m3-switch input:checked + .m3-switch-slider:before {
+  transform: translateX(20px);
+  background-color: var(--md-on-primary);
+  width: 22px;
+  height: 22px;
+  left: 3px;
+  bottom: 3px;
+}
+
+/* About Hero in Settings */
+.about-hero {
+  display: flex;
+  align-items: center;
   gap: 18px;
-  max-height: 65vh;
-  overflow-y: auto;
-  padding-right: 4px;
+  padding: 20px;
+  border-radius: var(--shape-corner-large);
+  background-color: var(--md-surface-container);
+  border: 1px solid var(--md-outline-variant);
+}
+
+.about-logo {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
 }
 
 /* Studio Wallpaper Presets Grid */
@@ -886,7 +1057,6 @@ body {
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
 }
 
-/* Dynamic Palette Swatches */
 .palette-preview {
   display: flex;
   gap: 8px;
@@ -906,7 +1076,6 @@ body {
   font-weight: 600;
 }
 
-/* Custom Upload Zone */
 .upload-zone {
   border: 2px dashed var(--md-outline);
   border-radius: var(--shape-corner-large);
@@ -931,7 +1100,6 @@ body {
   fill: var(--md-primary);
 }
 
-/* Settings Items */
 .setting-item {
   display: flex;
   align-items: center;
@@ -993,7 +1161,7 @@ body {
   border-color: var(--md-primary);
 }
 
-/* Menu Dropdown */
+/* Dropdown Menu */
 .dropdown-menu {
   position: absolute;
   top: 96px;

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="dark" data-mode="expressive">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,16 +9,16 @@
 <body>
 
   <!-- Top Header: Glassmorphic Titlebar & Floating Tabs -->
-  <header class="header-container">
+  <header class="header-container" id="mainHeader">
     <div class="titlebar">
       <div class="tabs-strip-container">
         <div class="tabs-scroll" id="tabsList">
-          <!-- Dynamic Material 3 Expressive Tabs -->
+          <!-- Dynamic Material Tabs rendered here -->
         </div>
         <button class="tab-add-btn" id="newTabBtn" title="New Tab (Ctrl+T)"></button>
       </div>
 
-      <!-- Window Control Buttons (Min, Max, Close) -->
+      <!-- Window Control Buttons -->
       <div class="window-controls">
         <button class="win-btn" id="winMinBtn" title="Minimize"></button>
         <button class="win-btn" id="winMaxBtn" title="Maximize"></button>
@@ -26,8 +26,8 @@
       </div>
     </div>
 
-    <!-- Navigation & Floating Omnibox Toolbar -->
-    <div class="toolbar">
+    <!-- Navigation & Omnibox Toolbar -->
+    <div class="toolbar" id="mainToolbar">
       <div class="nav-actions">
         <button class="icon-btn" id="backBtn" title="Back (Alt+Left)" disabled></button>
         <button class="icon-btn" id="forwardBtn" title="Forward (Alt+Right)" disabled></button>
@@ -35,9 +35,9 @@
         <button class="icon-btn" id="homeBtn" title="Home"></button>
       </div>
 
-      <!-- Material 3 Floating Omnibox -->
+      <!-- Floating Omnibox -->
       <div class="omnibox-container">
-        <div class="omnibox">
+        <div class="omnibox" id="omniboxShell">
           <div class="omnibox-chip" id="searchChip" title="Search Engine & Security">
             <span id="engineIcon"></span>
             <span id="securityIcon"></span>
@@ -75,11 +75,11 @@
   <div class="dropdown-menu" id="dropdownMenu">
     <div class="menu-item" id="menuNewTab">
       <span class="menu-icon" data-icon="add"></span>
-      <span>New Tab</span>
+      <span>New Tab (Ctrl+T)</span>
     </div>
     <div class="menu-item" id="menuWallpaper">
       <span class="menu-icon" data-icon="wallpaper"></span>
-      <span>Wallpaper & Theme</span>
+      <span>Wallpaper Studio</span>
     </div>
     <div class="menu-item" id="menuBookmarks">
       <span class="menu-icon" data-icon="bookmarks"></span>
@@ -87,7 +87,7 @@
     </div>
     <div class="menu-item" id="menuHistory">
       <span class="menu-icon" data-icon="history"></span>
-      <span>History</span>
+      <span>History (Ctrl+H)</span>
     </div>
     <div class="menu-item" id="menuDownloads">
       <span class="menu-icon" data-icon="download"></span>
@@ -104,37 +104,158 @@
     </div>
   </div>
 
-  <!-- Browser Content Area (Webviews & NTP) -->
+  <!-- Browser Content Area -->
   <main class="browser-content" id="browserContent">
     <!-- Active tab content or New Tab Page rendered here -->
   </main>
 
-  <!-- Material 3 Wallpaper & Theme Studio Modal -->
-  <div class="modal-overlay" id="wallpaperModal">
-    <div class="modal-dialog">
+  <!-- Animated Material 3 Settings Modal with Segmented Tabs -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-dialog settings-dialog">
       <div class="modal-header">
-        <h2 class="modal-title">Wallpaper & Dynamic Colors</h2>
-        <button class="icon-btn modal-close-btn" id="closeWallpaperBtn"></button>
+        <h2 class="modal-title">Settings</h2>
+        <button class="icon-btn modal-close-btn" id="closeSettingsBtn"></button>
       </div>
-      <div class="modal-body">
-        <!-- Live Palette Preview -->
-        <div class="setting-item" style="flex-direction: column; align-items: stretch; gap: 8px;">
-          <div class="setting-label">
-            <span class="setting-title">Material You Dynamic Palette</span>
-            <span class="setting-subtitle">Automatically generated from your wallpaper or solid color</span>
+
+      <!-- Animated Segmented Navigation Tabs -->
+      <div class="settings-segmented-bar">
+        <button class="settings-tab-btn active" data-tab="general">General</button>
+        <button class="settings-tab-btn" data-tab="appearance">Appearance</button>
+        <button class="settings-tab-btn" data-tab="search">Search & Privacy</button>
+        <button class="settings-tab-btn" data-tab="about">About</button>
+        <div class="segmented-pill-indicator" id="settingsPillIndicator"></div>
+      </div>
+
+      <div class="modal-body settings-panel-container">
+        <!-- Panel 1: General & Design Style Mode -->
+        <div class="settings-panel active" id="panelGeneral">
+          <div class="setting-item">
+            <div class="setting-label">
+              <span class="setting-title">Design Style Mode</span>
+              <span class="setting-subtitle">Switch between Simple (minimal & clean) and Expressive (glow & bento)</span>
+            </div>
+            <div class="setting-control">
+              <select id="designModeSelect">
+                <option value="expressive">Expressive Mode (Material You)</option>
+                <option value="simple">Simple Mode (Clean & Minimal)</option>
+              </select>
+            </div>
           </div>
-          <div class="palette-preview">
-            <div class="palette-chip" id="swatchPrimary" style="background: var(--md-primary); color: var(--md-on-primary);">Primary</div>
-            <div class="palette-chip" id="swatchContainer" style="background: var(--md-primary-container); color: var(--md-on-primary-container);">Container</div>
-            <div class="palette-chip" id="swatchSurface" style="background: var(--md-surface-container-high); color: var(--md-on-surface);">Surface</div>
+
+          <div class="setting-item">
+            <div class="setting-label">
+              <span class="setting-title">Theme Mode</span>
+              <span class="setting-subtitle">Dark or Light Material palette</span>
+            </div>
+            <div class="setting-control">
+              <select id="themeSelect">
+                <option value="dark">Dark Theme</option>
+                <option value="light">Light Theme</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-label">
+              <span class="setting-title">Bookmarks Bar</span>
+              <span class="setting-subtitle">Show quick bookmarks bar below the address bar</span>
+            </div>
+            <div class="setting-control">
+              <label class="m3-switch">
+                <input type="checkbox" id="showBookmarksToggle" checked />
+                <span class="m3-switch-slider"></span>
+              </label>
+            </div>
           </div>
         </div>
 
+        <!-- Panel 2: Appearance & Wallpapers -->
+        <div class="settings-panel" id="panelAppearance">
+          <div class="setting-item" style="flex-direction: column; align-items: stretch; gap: 8px;">
+            <div class="setting-label">
+              <span class="setting-title">Dynamic Monet Palette</span>
+              <span class="setting-subtitle">Generated in real-time from your active wallpaper</span>
+            </div>
+            <div class="palette-preview">
+              <div class="palette-chip" id="swatchPrimary" style="background: var(--md-primary); color: var(--md-on-primary);">Primary</div>
+              <div class="palette-chip" id="swatchContainer" style="background: var(--md-primary-container); color: var(--md-on-primary-container);">Container</div>
+              <div class="palette-chip" id="swatchSurface" style="background: var(--md-surface-container-high); color: var(--md-on-surface);">Surface</div>
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-label">
+              <span class="setting-title">Solid Accent Color</span>
+              <span class="setting-subtitle">Generate a custom dynamic palette from any base color</span>
+            </div>
+            <div class="setting-control">
+              <input type="color" id="settingsColorPicker" value="#7F52FF" />
+            </div>
+          </div>
+
+          <div class="setting-item" style="border-bottom: none; justify-content: flex-start;">
+            <button class="btn-tonal" id="openWallpaperStudioBtn">
+              Open Full Wallpaper Studio
+            </button>
+          </div>
+        </div>
+
+        <!-- Panel 3: Search & Privacy -->
+        <div class="settings-panel" id="panelSearch">
+          <div class="setting-item">
+            <div class="setting-label">
+              <span class="setting-title">Default Search Engine</span>
+              <span class="setting-subtitle">Engine used when entering queries in Omnibox</span>
+            </div>
+            <div class="setting-control">
+              <select id="searchEngineSelect">
+                <option value="duckduckgo" selected>DuckDuckGo (Default)</option>
+                <option value="google">Google</option>
+                <option value="bing">Bing</option>
+                <option value="yandex">Yandex</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="setting-item">
+            <div class="setting-label">
+              <span class="setting-title">Clear Browsing Data</span>
+              <span class="setting-subtitle">Clear cache, cookies, and search history</span>
+            </div>
+            <button class="btn-tonal" id="clearDataBtn">Clear Now</button>
+          </div>
+        </div>
+
+        <!-- Panel 4: About -->
+        <div class="settings-panel" id="panelAbout">
+          <div class="about-hero">
+            <img src="../../assets/icon.png" alt="Material Browser" class="about-logo" />
+            <div class="about-info">
+              <h3 style="font-size: 18px; font-weight: 600;">Material Browser</h3>
+              <p style="font-size: 13px; color: var(--md-on-surface-variant); margin-top: 4px;" id="systemInfoText">
+                Chromium based | Material Design 3 Expressive
+              </p>
+              <p style="font-size: 12px; color: var(--md-primary); margin-top: 6px;">Version 1.0.0 (Release)</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wallpaper Studio Modal -->
+  <div class="modal-overlay" id="wallpaperModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 class="modal-title">Wallpaper Studio</h2>
+        <button class="icon-btn modal-close-btn" id="closeWallpaperBtn"></button>
+      </div>
+      <div class="modal-body">
         <!-- Custom Upload Zone -->
         <div class="setting-item" style="flex-direction: column; align-items: stretch; gap: 8px;">
           <div class="setting-label">
-            <span class="setting-title">Custom Wallpaper Image</span>
-            <span class="setting-subtitle">Upload any image — the browser will adapt its dynamic colors to it</span>
+            <span class="setting-title">Upload Custom Wallpaper</span>
+            <span class="setting-subtitle">Upload any image — colors will dynamically extract from it</span>
           </div>
           <div class="upload-zone" id="uploadZone">
             <span id="uploadIcon"></span>
@@ -147,7 +268,7 @@
         <div class="setting-item">
           <div class="setting-label">
             <span class="setting-title">Solid Accent Color</span>
-            <span class="setting-subtitle">Or pick a base color to generate the entire theme</span>
+            <span class="setting-subtitle">Or set a solid color background with matching palette</span>
           </div>
           <div class="setting-control">
             <input type="color" id="solidColorPicker" value="#7F52FF" />
@@ -157,8 +278,8 @@
         <!-- Preset Wallpapers Grid -->
         <div class="setting-item" style="flex-direction: column; align-items: stretch; gap: 8px; border-bottom: none;">
           <div class="setting-label">
-            <span class="setting-title">Preset Wallpapers</span>
-            <span class="setting-subtitle">Curated Material You themes</span>
+            <span class="setting-title">Curated Wallpaper Presets</span>
+            <span class="setting-subtitle">One-click Material You themes</span>
           </div>
           <div class="wallpaper-grid" id="wallpaperPresetsGrid">
             <!-- Rendered dynamically -->
@@ -168,65 +289,7 @@
     </div>
   </div>
 
-  <!-- Material 3 Settings Modal -->
-  <div class="modal-overlay" id="settingsModal">
-    <div class="modal-dialog">
-      <div class="modal-header">
-        <h2 class="modal-title">Settings</h2>
-        <button class="icon-btn modal-close-btn" id="closeSettingsBtn"></button>
-      </div>
-      <div class="modal-body">
-        <!-- Appearance Theme -->
-        <div class="setting-item">
-          <div class="setting-label">
-            <span class="setting-title">Color Mode</span>
-            <span class="setting-subtitle">Switch between Dark and Light Material theme</span>
-          </div>
-          <div class="setting-control">
-            <select id="themeSelect">
-              <option value="dark">Dark Mode</option>
-              <option value="light">Light Mode</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Default Search Engine -->
-        <div class="setting-item">
-          <div class="setting-label">
-            <span class="setting-title">Default Search Engine</span>
-            <span class="setting-subtitle">Engine used when typing in omnibox or new tab</span>
-          </div>
-          <div class="setting-control">
-            <select id="searchEngineSelect">
-              <option value="duckduckgo" selected>DuckDuckGo (Default)</option>
-              <option value="google">Google</option>
-              <option value="bing">Bing</option>
-              <option value="yandex">Yandex</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Clear Browsing Data -->
-        <div class="setting-item">
-          <div class="setting-label">
-            <span class="setting-title">Clear Browsing Data</span>
-            <span class="setting-subtitle">Clear cache, cookies, and history</span>
-          </div>
-          <button class="btn-tonal" id="clearDataBtn">Clear Now</button>
-        </div>
-
-        <!-- About Material Browser -->
-        <div class="setting-item" style="border-bottom: none;">
-          <div class="setting-label">
-            <span class="setting-title">About Material Browser Expressive</span>
-            <span class="setting-subtitle" id="systemInfoText">Chromium based | Material You M3</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Material 3 History Modal -->
+  <!-- History Modal -->
   <div class="modal-overlay" id="historyModal">
     <div class="modal-dialog">
       <div class="modal-header">

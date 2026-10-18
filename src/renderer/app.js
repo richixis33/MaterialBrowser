@@ -1,4 +1,4 @@
-// Material Browser Expressive - Main Application Logic
+// Material Browser Expressive & Simple Mode - Main Application Logic
 (() => {
   // DOM Elements
   const tabsList = document.getElementById('tabsList');
@@ -38,6 +38,10 @@
   const closeHistoryBtn = document.getElementById('closeHistoryBtn');
   const historyList = document.getElementById('historyList');
   const themeSelect = document.getElementById('themeSelect');
+  const designModeSelect = document.getElementById('designModeSelect');
+  const showBookmarksToggle = document.getElementById('showBookmarksToggle');
+  const settingsColorPicker = document.getElementById('settingsColorPicker');
+  const openWallpaperStudioBtn = document.getElementById('openWallpaperStudioBtn');
   const searchEngineSelect = document.getElementById('searchEngineSelect');
   const clearDataBtn = document.getElementById('clearDataBtn');
   const systemInfoText = document.getElementById('systemInfoText');
@@ -51,10 +55,12 @@
 
   let settings = {
     theme: 'dark',
+    designMode: 'expressive', // 'expressive' or 'simple'
     searchEngine: 'duckduckgo',
-    wallpaperType: 'preset', // 'preset', 'custom', or 'color'
-    wallpaperValue: 'cosmic-violet', // preset id or dataUrl or hex
-    accentColor: '#7F52FF'
+    wallpaperType: 'preset',
+    wallpaperValue: 'cosmic-violet',
+    accentColor: '#7F52FF',
+    showBookmarksBar: true
   };
 
   const SEARCH_ENGINES = {
@@ -101,7 +107,6 @@
     closeHistoryBtn.innerHTML = Icons.close;
     document.getElementById('uploadIcon').innerHTML = Icons.upload;
 
-    // Dropdown menu icons
     document.querySelectorAll('.menu-icon').forEach(el => {
       const iconName = el.getAttribute('data-icon');
       if (Icons[iconName]) el.innerHTML = Icons[iconName];
@@ -115,7 +120,7 @@
     engineIcon.innerHTML = curEngine.icon;
   }
 
-  // Load Settings and Initialize Dynamic Theme
+  // Load Settings and Storage
   async function initStorage() {
     if (window.browserAPI) {
       try {
@@ -138,8 +143,22 @@
       }
     }
 
+    applyDesignMode();
     applyThemeSettings();
     renderWallpaperPresets();
+  }
+
+  // Apply Design Style Mode ('expressive' vs 'simple')
+  function applyDesignMode() {
+    document.documentElement.setAttribute('data-mode', settings.designMode || 'expressive');
+    if (designModeSelect) designModeSelect.value = settings.designMode || 'expressive';
+
+    if (showBookmarksToggle) {
+      showBookmarksToggle.checked = settings.showBookmarksBar !== false;
+    }
+    if (bookmarksBar) {
+      bookmarksBar.style.display = settings.showBookmarksBar !== false ? 'flex' : 'none';
+    }
   }
 
   // Apply Theme & Extract Dynamic Colors
@@ -152,13 +171,12 @@
     updateEngineIcon();
 
     if (settings.wallpaperType === 'color') {
-      // Solid Color -> Generate M3 Palette
       const hsl = ThemeEngine.hexToHsl(settings.wallpaperValue);
       const palette = ThemeEngine.generateM3Palette(hsl, isDark);
       ThemeEngine.applyPalette(palette);
       if (solidColorPicker) solidColorPicker.value = settings.wallpaperValue;
+      if (settingsColorPicker) settingsColorPicker.value = settings.wallpaperValue;
     } else if (settings.wallpaperType === 'custom') {
-      // Custom Uploaded Image -> Extract Colors & Generate M3 Palette
       const img = new Image();
       img.onload = async () => {
         const hsl = await ThemeEngine.extractDominantColor(img);
@@ -167,20 +185,17 @@
       };
       img.src = settings.wallpaperValue;
     } else {
-      // Preset Wallpaper
       const preset = ThemeEngine.PRESET_WALLPAPERS.find(p => p.id === settings.wallpaperValue) || ThemeEngine.PRESET_WALLPAPERS[0];
       const hsl = ThemeEngine.hexToHsl(preset.baseColor);
       const palette = ThemeEngine.generateM3Palette(hsl, isDark);
       ThemeEngine.applyPalette(palette);
     }
 
-    // Refresh New Tab Pages currently open
     document.querySelectorAll('.wallpaper-layer').forEach(layer => {
       applyWallpaperToElement(layer);
     });
   }
 
-  // Apply Wallpaper CSS to a specific background element
   function applyWallpaperToElement(el) {
     if (settings.wallpaperType === 'color') {
       el.style.backgroundImage = 'none';
@@ -195,7 +210,6 @@
     }
   }
 
-  // Render Preset Wallpapers in Studio Grid
   function renderWallpaperPresets() {
     wallpaperPresetsGrid.innerHTML = '';
     ThemeEngine.PRESET_WALLPAPERS.forEach(preset => {
@@ -222,6 +236,25 @@
     }
   }
 
+  // Animated Settings Segmented Tabs
+  document.querySelectorAll('.settings-tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tabKey = btn.getAttribute('data-tab');
+
+      document.querySelectorAll('.settings-tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+
+      document.querySelectorAll('.settings-panel').forEach(panel => {
+        panel.classList.remove('active');
+      });
+
+      const targetPanel = document.getElementById(`panel${tabKey.charAt(0).toUpperCase() + tabKey.slice(1)}`);
+      if (targetPanel) {
+        targetPanel.classList.add('active');
+      }
+    });
+  });
+
   // Create a New Tab
   function createTab(url = 'newtab') {
     tabCounter++;
@@ -241,7 +274,6 @@
 
     tabs.push(tabData);
 
-    // Create Tab DOM item
     const tabEl = document.createElement('div');
     tabEl.className = 'tab-item';
     tabEl.id = `tab_item_${tabId}`;
@@ -264,7 +296,6 @@
 
     tabsList.appendChild(tabEl);
 
-    // Create Tab Content Wrapper
     const contentEl = document.createElement('div');
     contentEl.className = 'webview-wrapper';
     contentEl.id = `content_${tabId}`;
@@ -345,13 +376,8 @@
     container.appendChild(webview);
   }
 
-  // HTML template for Expressive New Tab Page
+  // HTML template for New Tab Page (With App Icon & Title, No Clock or Greeting text)
   function createNewTabHtml() {
-    const hours = new Date().getHours();
-    let greeting = 'Good morning';
-    if (hours >= 12 && hours < 17) greeting = 'Good afternoon';
-    else if (hours >= 17 || hours < 5) greeting = 'Good evening';
-
     const searchEngine = SEARCH_ENGINES[settings.searchEngine] || SEARCH_ENGINES.duckduckgo;
 
     return `
@@ -359,14 +385,16 @@
         <div class="wallpaper-layer"></div>
         <div class="wallpaper-overlay"></div>
         <div class="newtab-content">
-          <div class="newtab-clock-card">
-            <div class="newtab-clock" id="ntpClock">12:00</div>
-            <div class="newtab-greeting-pill">
-              <span>${greeting}</span>
+          <!-- Hero Branding with Icon & Name -->
+          <div class="newtab-hero-card">
+            <div class="hero-logo-wrapper">
+              <img src="../../assets/icon.png" alt="Material Browser" class="hero-logo" />
             </div>
+            <h1 class="newtab-hero-title">Material Browser</h1>
+            <p class="newtab-hero-subtitle">Fast, secure & private web browsing</p>
           </div>
 
-          <!-- Expressive DuckDuckGo Search Capsule -->
+          <!-- DuckDuckGo Search Capsule -->
           <div class="newtab-search-box">
             <div class="newtab-ddg-badge">
               ${searchEngine.icon}
@@ -412,16 +440,6 @@
   function setupNewTabPageEvents(container, tabId) {
     const wallpaperLayer = container.querySelector('.wallpaper-layer');
     if (wallpaperLayer) applyWallpaperToElement(wallpaperLayer);
-
-    const clockEl = container.querySelector('#ntpClock');
-    const updateClock = () => {
-      const now = new Date();
-      if (clockEl) {
-        clockEl.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      }
-    };
-    updateClock();
-    setInterval(updateClock, 1000);
 
     const searchInput = container.querySelector('.newtab-search-input');
     if (searchInput) {
@@ -482,16 +500,22 @@
     updateTabLoadingState(tabId, tabData.isLoading);
   }
 
-  // Close Tab
+  // Close Tab (Bug Fix: properly stops webview before detachment)
   function closeTab(tabId) {
     const index = tabs.findIndex(t => t.id === tabId);
     if (index === -1) return;
 
+    const contentEl = document.getElementById(`content_${tabId}`);
+    if (contentEl) {
+      const webview = contentEl.querySelector('webview');
+      if (webview) {
+        try { webview.stop(); } catch (err) {}
+      }
+      contentEl.remove();
+    }
+
     const tabEl = document.getElementById(`tab_item_${tabId}`);
     if (tabEl) tabEl.remove();
-
-    const contentEl = document.getElementById(`content_${tabId}`);
-    if (contentEl) contentEl.remove();
 
     tabs.splice(index, 1);
 
@@ -503,7 +527,7 @@
     }
   }
 
-  // Navigate Active Tab (Defaults to DuckDuckGo)
+  // Navigate Active Tab (Bug fix: enhanced URL detection)
   function navigateTo(query) {
     if (!query) return;
     const tabData = tabs.find(t => t.id === activeTabId);
@@ -511,8 +535,9 @@
 
     let targetUrl = query.trim();
 
-    const isUrl = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/.test(targetUrl) ||
-                  /^localhost(:\d+)?(\/.*)?$/.test(targetUrl);
+    const isUrl = /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}(:\d+)?(\/.*)?$/i.test(targetUrl) ||
+                  /^(https?:\/\/)?localhost(:\d+)?(\/.*)?$/i.test(targetUrl) ||
+                  /^(https?:\/\/)?\d{1,3}(\.\d{1,3}){3}(:\d+)?(\/.*)?$/.test(targetUrl);
 
     if (isUrl) {
       if (!/^https?:\/\//i.test(targetUrl)) {
@@ -551,7 +576,7 @@
     }
   }
 
-  // Update Loading State (Expressive Shape-Morphing Loader)
+  // Update Loading State (Shape-Morphing Loader)
   function updateTabLoadingState(tabId, isLoading) {
     const tabEl = document.getElementById(`tab_item_${tabId}`);
     const tabData = tabs.find(t => t.id === tabId);
@@ -559,7 +584,6 @@
     if (tabEl && tabData) {
       const favEl = tabEl.querySelector('.tab-favicon');
       if (isLoading) {
-        // Render dynamic shape-morphing loader in tab
         favEl.innerHTML = Icons.shapeMorphSpinner(16);
       } else {
         if (tabData.favicon) {
@@ -575,7 +599,7 @@
     }
   }
 
-  // Navigation state
+  // Navigation State
   function updateTabNavigationState(tabId, webview) {
     const tabData = tabs.find(t => t.id === tabId);
     if (tabData && webview) {
@@ -603,7 +627,7 @@
     }
   }
 
-  // Bookmarks
+  // Bookmarks Bar
   function renderBookmarksBar() {
     bookmarksBar.innerHTML = '';
     bookmarks.forEach(bm => {
@@ -673,7 +697,7 @@
     });
   }
 
-  // Wallpaper Upload Handling (Drag & Drop or File Dialog)
+  // Wallpaper Upload Handling
   function handleWallpaperFile(file) {
     if (!file || !file.type.startsWith('image/')) return;
     const reader = new FileReader();
@@ -767,6 +791,11 @@
   settingsBtn.addEventListener('click', () => settingsModal.classList.add('open'));
   closeSettingsBtn.addEventListener('click', () => settingsModal.classList.remove('open'));
 
+  openWallpaperStudioBtn.addEventListener('click', () => {
+    settingsModal.classList.remove('open');
+    wallpaperModal.classList.add('open');
+  });
+
   document.getElementById('menuNewTab').addEventListener('click', () => createTab('newtab'));
   document.getElementById('menuWallpaper').addEventListener('click', () => wallpaperModal.classList.add('open'));
   document.getElementById('menuSettings').addEventListener('click', () => settingsModal.classList.add('open'));
@@ -782,7 +811,7 @@
     if (webview) webview.openDevTools();
   });
 
-  // Wallpaper Upload Zone & File Picker
+  // Wallpaper Upload Zone
   uploadZone.addEventListener('click', () => wallpaperFileInput.click());
   wallpaperFileInput.addEventListener('change', (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -807,7 +836,7 @@
     }
   });
 
-  // Solid Color Picker
+  // Solid Color Pickers
   solidColorPicker.addEventListener('input', (e) => {
     settings.wallpaperType = 'color';
     settings.wallpaperValue = e.target.value;
@@ -816,7 +845,29 @@
     saveSettings();
   });
 
-  // Settings
+  settingsColorPicker.addEventListener('input', (e) => {
+    settings.wallpaperType = 'color';
+    settings.wallpaperValue = e.target.value;
+    applyThemeSettings();
+    renderWallpaperPresets();
+    saveSettings();
+  });
+
+  // Design Mode Switcher
+  designModeSelect.addEventListener('change', (e) => {
+    settings.designMode = e.target.value;
+    applyDesignMode();
+    saveSettings();
+  });
+
+  // Bookmarks Toggle
+  showBookmarksToggle.addEventListener('change', (e) => {
+    settings.showBookmarksBar = e.target.checked;
+    bookmarksBar.style.display = e.target.checked ? 'flex' : 'none';
+    saveSettings();
+  });
+
+  // Theme Select
   themeSelect.addEventListener('change', (e) => {
     settings.theme = e.target.value;
     applyThemeSettings();
