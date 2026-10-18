@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark" data-accent="indigo">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Material Browser</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- Top Header: Titlebar & Tab Strip -->
+  <header class="header-container">
+    <div class="titlebar">
+      <div class="tabs-strip-container">
+        <div class="tabs-scroll" id="tabsList">
+          <!-- Dynamic Material Tabs will be inserted here -->
+        </div>
+        <button class="tab-add-btn" id="newTabBtn" title="New Tab (Ctrl+T)">
+          <!-- Add Icon -->
+        </button>
+      </div>
+
+      <!-- Window Control Buttons (Min, Max, Close) -->
+      <div class="window-controls">
+        <button class="win-btn" id="winMinBtn" title="Minimize"></button>
+        <button class="win-btn" id="winMaxBtn" title="Maximize"></button>
+        <button class="win-btn close-btn" id="winCloseBtn" title="Close"></button>
+      </div>
+    </div>
+
+    <!-- Navigation & Omnibox Toolbar -->
+    <div class="toolbar">
+      <div class="nav-actions">
+        <button class="icon-btn" id="backBtn" title="Back (Alt+Left)" disabled></button>
+        <button class="icon-btn" id="forwardBtn" title="Forward (Alt+Right)" disabled></button>
+        <button class="icon-btn" id="refreshBtn" title="Reload (Ctrl+R)"></button>
+        <button class="icon-btn" id="homeBtn" title="Home"></button>
+      </div>
+
+      <!-- Material 3 Omnibox / Address Bar -->
+      <div class="omnibox-container">
+        <div class="omnibox">
+          <div class="omnibox-security-icon" id="securityIcon" title="Connection Security">
+            <!-- Security Lock Icon -->
+          </div>
+          <input
+            type="text"
+            class="omnibox-input"
+            id="urlInput"
+            placeholder="Search Google or enter address"
+            spellcheck="false"
+            autocomplete="off"
+          />
+          <div class="omnibox-actions">
+            <button class="icon-btn omnibox-star-btn" id="starBtn" title="Bookmark this tab"></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Action Buttons -->
+      <div class="nav-actions">
+        <button class="icon-btn" id="downloadsBtn" title="Downloads"></button>
+        <button class="icon-btn" id="settingsBtn" title="Settings"></button>
+        <button class="icon-btn" id="menuBtn" title="Customize and control Material Browser"></button>
+      </div>
+    </div>
+
+    <!-- Bookmarks Bar -->
+    <div class="bookmarks-bar" id="bookmarksBar">
+      <!-- Bookmarks dynamically rendered here -->
+    </div>
+  </header>
+
+  <!-- 3-Dots Dropdown Menu -->
+  <div class="dropdown-menu" id="dropdownMenu">
+    <div class="menu-item" id="menuNewTab">
+      <span class="menu-icon" data-icon="add"></span>
+      <span>New Tab</span>
+    </div>
+    <div class="menu-item" id="menuBookmarks">
+      <span class="menu-icon" data-icon="bookmarks"></span>
+      <span>Bookmarks</span>
+    </div>
+    <div class="menu-item" id="menuHistory">
+      <span class="menu-icon" data-icon="history"></span>
+      <span>History</span>
+    </div>
+    <div class="menu-item" id="menuDownloads">
+      <span class="menu-icon" data-icon="download"></span>
+      <span>Downloads</span>
+    </div>
+    <div class="menu-divider"></div>
+    <div class="menu-item" id="menuDevTools">
+      <span class="menu-icon" data-icon="settings"></span>
+      <span>Developer Tools (F12)</span>
+    </div>
+    <div class="menu-item" id="menuSettings">
+      <span class="menu-icon" data-icon="settings"></span>
+      <span>Settings</span>
+    </div>
+  </div>
+
+  <!-- Browser Content Area (Webviews & NTP) -->
+  <main class="browser-content" id="browserContent">
+    <!-- Active tab content goes here -->
+  </main>
+
+  <!-- Material 3 Settings Dialog -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 class="modal-title">Settings</h2>
+        <button class="icon-btn modal-close-btn" id="closeSettingsBtn"></button>
+      </div>
+      <div class="modal-body">
+        <!-- Appearance Theme -->
+        <div class="setting-item">
+          <div class="setting-label">
+            <span class="setting-title">Theme</span>
+            <span class="setting-subtitle">Choose between Light or Dark theme</span>
+          </div>
+          <div class="setting-control">
+            <select id="themeSelect">
+              <option value="dark">Dark Theme</option>
+              <option value="light">Light Theme</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Material Accent Colors -->
+        <div class="setting-item">
+          <div class="setting-label">
+            <span class="setting-title">Material Accent Color</span>
+            <span class="setting-subtitle">Dynamic Material You color accents</span>
+          </div>
+          <div class="accent-picker" id="accentPicker">
+            <div class="accent-circle selected" data-accent="indigo" style="background: #A8C7FA;" title="Indigo"></div>
+            <div class="accent-circle" data-accent="purple" style="background: #D0BCFF;" title="Purple"></div>
+            <div class="accent-circle" data-accent="emerald" style="background: #6CDDB2;" title="Emerald"></div>
+            <div class="accent-circle" data-accent="amber" style="background: #FFB786;" title="Amber"></div>
+            <div class="accent-circle" data-accent="rose" style="background: #FFB1C8;" title="Rose"></div>
+          </div>
+        </div>
+
+        <!-- Default Search Engine -->
+        <div class="setting-item">
+          <div class="setting-label">
+            <span class="setting-title">Default Search Engine</span>
+            <span class="setting-subtitle">Engine used when typing in omnibox</span>
+          </div>
+          <div class="setting-control">
+            <select id="searchEngineSelect">
+              <option value="google">Google</option>
+              <option value="duckduckgo">DuckDuckGo</option>
+              <option value="bing">Bing</option>
+              <option value="yandex">Yandex</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Clear Browsing Data -->
+        <div class="setting-item">
+          <div class="setting-label">
+            <span class="setting-title">Clear Browsing Data</span>
+            <span class="setting-subtitle">Clear cache, cookies, and history</span>
+          </div>
+          <button class="btn-tonal" id="clearDataBtn">Clear Now</button>
+        </div>
+
+        <!-- About Material Browser -->
+        <div class="setting-item" style="border-bottom: none;">
+          <div class="setting-label">
+            <span class="setting-title">About Material Browser</span>
+            <span class="setting-subtitle" id="systemInfoText">Chromium based | Material Design 3</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Material 3 History Modal -->
+  <div class="modal-overlay" id="historyModal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h2 class="modal-title">Browsing History</h2>
+        <button class="icon-btn modal-close-btn" id="closeHistoryBtn"></button>
+      </div>
+      <div class="modal-body" id="historyList">
+        <!-- History items rendered here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="icons.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
