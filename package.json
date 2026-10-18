@@ -5,10 +5,11 @@
   "main": "src/main/main.js",
   "scripts": {
     "start": "electron .",
-    "pack": "electron-builder --dir",
-    "dist": "electron-builder",
-    "build:win": "electron-builder --win",
-    "build:portable": "electron-builder --win portable"
+    "build:icon": "node -e \"const fs = require('fs'); require('png-to-ico')('assets/icon.png').then(buf => { fs.writeFileSync('assets/icon.ico', buf); fs.mkdirSync('build', {recursive: true}); fs.writeFileSync('build/icon.ico', buf); console.log('Icon generated successfully'); });\"",
+    "pack": "npm run build:icon && electron-builder --dir",
+    "dist": "npm run build:icon && electron-builder",
+    "build:win": "npm run build:icon && electron-builder --win",
+    "build:portable": "npm run build:icon && electron-builder --win portable"
   },
   "keywords": [
     "browser",
@@ -21,7 +22,8 @@
   "license": "MIT",
   "devDependencies": {
     "electron": "^33.2.0",
-    "electron-builder": "^25.1.8"
+    "electron-builder": "^25.1.8",
+    "png-to-ico": "^2.1.8"
   },
   "build": {
     "appId": "com.materialbrowser.app",

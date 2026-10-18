@@ -28,6 +28,17 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: Generate production Windows icons (256x256)
+        run: |
+          if (Get-Command magick -ErrorAction SilentlyContinue) {
+            magick assets/icon.png -define icon:auto-resize=256,128,64,48,32,16 assets/icon.ico
+            Write-Host "Generated icon using ImageMagick"
+          } else {
+            npm run build:icon
+          }
+          if (!(Test-Path build)) { New-Item -ItemType Directory build }
+          Copy-Item assets/icon.ico build/icon.ico
+
       - name: Build Electron app with electron-builder
         run: npm run dist
         env:
